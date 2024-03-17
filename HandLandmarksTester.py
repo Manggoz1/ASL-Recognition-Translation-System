@@ -13,6 +13,9 @@ cap = cv2.VideoCapture(0)
 # List to store landmarks for each frame
 landmarks_data = []
 
+# Counter to keep track of the number of frames processed
+frame_count = 0
+
 while cap.isOpened():
     # Read a frame from the video capture
     ret, frame = cap.read()
@@ -33,10 +36,36 @@ while cap.isOpened():
             
             # Append landmarks to the list for this frame
             for landmark in landmarks.landmark:
-                landmarks_for_frame.append([landmark.x, landmark.y, landmark.z ])
+                landmarks_for_frame.extend([landmark.x, landmark.y, landmark.z])
 
         # Append the landmarks for this frame to the overall list
-        landmarks_data.append(landmarks_for_frame)
+        landmarks_data.extend(landmarks_for_frame)
+
+    # Increment frame count
+    frame_count += 1
+
+    # Check if 30 frames have been processed
+    if frame_count == 30:
+        landmarks_data_truncated = landmarks_data[:1890]
+        
+        # Export the landmarks data to a CSV file
+        csv_filename = f'test_hand_landmarks_data.csv'
+        if(len(landmarks_data_truncated)>= 1890):
+            with open(csv_filename, 'a', newline='') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                
+                # Write data
+                csv_writer.writerow(landmarks_data_truncated)
+                
+            print(f'Landmarks data exported to {csv_filename}')
+            # Reset frame count and landmarks data
+            frame_count = 0
+            landmarks_data = []
+        else:
+            frame_count = 0
+            landmarks_data = []
+
+
 
     # Display the frame
     cv2.imshow('Hand Gesture Recognition', frame)
@@ -48,18 +77,3 @@ while cap.isOpened():
 # Release the video capture and close all windows
 cap.release()
 cv2.destroyAllWindows()
-
-# Export the landmarks data to a CSV file
-csv_filename = 'hand_landmarks_data.csv'
-with open(csv_filename, 'w', newline='') as csvfile:
-    csv_writer = csv.writer(csvfile)
-    
-    # Write header
-    csv_writer.writerow(['Frame', 'Landmark Index', 'X', 'Y', 'Z'])
-    
-    # Write data
-    for frame_idx, landmarks_for_frame in enumerate(landmarks_data):
-        for landmark_idx, landmarks in enumerate(landmarks_for_frame):
-            csv_writer.writerow([frame_idx, landmark_idx, *landmarks])
-
-print(f'Landmarks data exported to {csv_filename}')

@@ -46,19 +46,21 @@ while cap.isOpened():
 
     # Check if 30 frames have been processed
     if frame_count == 30:
+        landmarks_data_truncated = landmarks_data[:1890]
         # Export the landmarks data to a CSV file
         csv_filename = f'hand_landmarks_data.csv'
         with open(csv_filename, 'a', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
             
             # Write data
-            csv_writer.writerow(landmarks_data)
+            csv_writer.writerow(landmarks_data_truncated)
+            
             
 
         print(f'Landmarks data exported to {csv_filename}')
-
+        
         csv_fileletter=f'hand_landmarks_letter.csv'
-        Letter="D"
+        Letter="C"
         with open(csv_fileletter,'a', newline='')as csvfile:
             csv_writer = csv.writer(csvfile)
 
