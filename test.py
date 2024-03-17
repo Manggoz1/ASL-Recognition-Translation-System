@@ -2,6 +2,27 @@ import cv2
 import mediapipe as mp
 import csv
 
+
+def pre_process_landmark(landmarks_for_frame):
+    temp_landmark_data = []
+
+    base_x, base_y = 0,0
+    i = 0
+    base_x = landmarks_for_frame[0]
+    base_y = landmarks_for_frame[1]
+    base_z = landmarks_for_frame[2]
+    while(i<len(landmarks_for_frame)-2):
+            temp_landmark_data.append(landmarks_for_frame[i] - base_x)
+            i+=1
+            temp_landmark_data.append(landmarks_for_frame[i] - base_y)
+            i+=1 
+            i+=1
+
+    return temp_landmark_data
+    
+
+
+
 # Initialize MediaPipe hand tracking
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -39,37 +60,40 @@ while cap.isOpened():
                 landmarks_for_frame.extend([landmark.x, landmark.y, landmark.z])
 
         # Append the landmarks for this frame to the overall list
-        landmarks_data.extend(landmarks_for_frame)
+            landmarks_data.extend(pre_process_landmark(landmarks_for_frame))
+          
 
     # Increment frame count
     frame_count += 1
 
     # Check if 30 frames have been processed
     if frame_count == 30:
-        landmarks_data_truncated = landmarks_data[:1890]
+        landmarks_data_truncated = landmarks_data[:1260]
+        
         # Export the landmarks data to a CSV file
-        csv_filename = f'hand_landmarks_data.csv'
-        with open(csv_filename, 'a', newline='') as csvfile:
-            csv_writer = csv.writer(csvfile)
-            
-            # Write data
-            csv_writer.writerow(landmarks_data_truncated)
-            
+        csv_filename = f'Testing.csv'
+        if(len(landmarks_data_truncated)==1260):
+            with open(csv_filename, 'a', newline='') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                # Write data
+                csv_writer.writerow(landmarks_data)
+                
             
 
         print(f'Landmarks data exported to {csv_filename}')
         
-        csv_fileletter=f'hand_landmarks_letter.csv'
-        Letter="C"
-        with open(csv_fileletter,'a', newline='')as csvfile:
-            csv_writer = csv.writer(csvfile)
+        #csv_fileletter=f'hand_landmarks_letter.csv'
+        #Letter="C"
+        # with open(csv_fileletter,'a', newline='')as csvfile:
+        #     csv_writer = csv.writer(csvfile)
 
-            # Write Letter
-            csv_writer.writerow(Letter)
+        #     # Write Letter
+        #     csv_writer.writerow(Letter)
 
-        # Reset frame count and landmarks data
+        # # Reset frame count and landmarks data
         frame_count = 0
         landmarks_data = []
+        
 
     # Display the frame
     cv2.imshow('Hand Gesture Recognition', frame)
